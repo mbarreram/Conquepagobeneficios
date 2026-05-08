@@ -85,12 +85,20 @@ function renderTable(items) {
   resultsBody.innerHTML = items.map((item) => {
     const tarjetas = (item.tarjetas || []).map((t) => `<span class="badge">${escapeHtml(t)}</span>`).join('');
     const dias = (item.diasAplican || []).map((d) => `<span class="badge">${escapeHtml(d)}</span>`).join('');
+    const logo = item.logoComercio
+      ? `<img class="merchant-logo" src="${escapeHtml(item.logoComercio)}" alt="${escapeHtml(item.comercio || 'Logo comercio')}" loading="lazy" referrerpolicy="no-referrer" />`
+      : `<div class="merchant-logo merchant-logo-fallback">${escapeHtml((item.comercio || '?').slice(0, 1).toUpperCase())}</div>`;
 
     return `
       <tr>
         <td>
-          <strong>${escapeHtml(item.comercio || '-')}</strong>
-          <div class="small">${escapeHtml(item.ubicacion || '')}</div>
+          <div class="merchant-cell">
+            ${logo}
+            <div>
+              <strong>${escapeHtml(item.comercio || '-')}</strong>
+              <div class="small">${escapeHtml(item.ubicacion || '')}</div>
+            </div>
+          </div>
         </td>
         <td>${escapeHtml(item.categoria || '-')}</td>
         <td>
@@ -149,7 +157,7 @@ function downloadFile(filename, content, type) {
 
 function toCsv(rows) {
   const headers = [
-    'banco','tarjetaPrincipal','tarjetas','comercio','categoria','beneficio','detalle','modalidad','ubicacion','vigencia','diasAplican','tope','medioPago','urlFuente','fechaExtraccion'
+    'banco','tarjetaPrincipal','tarjetas','comercio','categoria','beneficio','detalle','modalidad','ubicacion','logoComercio','vigencia','diasAplican','tope','medioPago','urlFuente','fechaExtraccion'
   ];
   const esc = (value) => `"${String(value ?? '').replaceAll('"', '""')}"`;
   const lines = [headers.join(',')];
@@ -165,6 +173,7 @@ function toCsv(rows) {
       item.detalle,
       item.modalidad,
       item.ubicacion,
+      item.logoComercio,
       item.vigencia,
       (item.diasAplican || []).join(' | '),
       item.tope,
