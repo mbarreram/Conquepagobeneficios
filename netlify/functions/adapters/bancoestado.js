@@ -1,0 +1,1 @@
+module.exports = async () => [{ banco:'BancoEstado', fuente:'https://www.bancoestado.cl/content/bancoestado-public/cl/es/home/home/todosuma---bancoestado-personas/todos-beneficios.html#/inicio', estado:'adapter activo'}];

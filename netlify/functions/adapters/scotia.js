@@ -1,0 +1,1 @@
+module.exports = async () => [{ banco:'Scotiabank', fuente:'https://www.scotiarewards.cl/scclubfront/categoria/mundos/descuentos', estado:'adapter activo'}];

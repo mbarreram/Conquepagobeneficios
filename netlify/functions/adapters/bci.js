@@ -1,0 +1,1 @@
+module.exports = async () => [{ banco:'BCI', fuente:'https://www.bci.cl/beneficios/beneficios-bci/', estado:'adapter activo'}];

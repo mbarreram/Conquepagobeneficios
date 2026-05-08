@@ -1,0 +1,1 @@
+module.exports = async () => [{ banco:'Banco de Chile', fuente:'https://sitiospublicos.bancochile.cl/personas/beneficios/categoria', estado:'adapter activo'}];

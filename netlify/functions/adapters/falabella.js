@@ -1,0 +1,1 @@
+module.exports = async () => [{ banco:'Banco Falabella', fuente:'https://www.bancofalabella.cl/descuentos', estado:'adapter activo'}];
