@@ -5,9 +5,24 @@ const BASE_URL = 'https://www.bancofalabella.cl';
 const LIST_URL = `${BASE_URL}/descuentos`;
 const SITEMAP_URL = `${BASE_URL}/sitemap.xml`;
 const CATEGORY_PATHS = [
+  '/descuentos/todos',
+  '/descuentos/elite',
+  '/descuentos/regiones',
+  '/descuentos/restaurantes',
   '/descuentos/antojos',
+  '/descuentos/mercado',
   '/descuentos/viajes',
-  '/descuentos/todos'
+  '/descuentos/transporte',
+  '/descuentos/entretencion',
+  '/descuentos/salud',
+  '/descuentos/belleza',
+  '/descuentos/servicios',
+  '/descuentos/hogar',
+  '/descuentos/mascotas',
+  '/descuentos/cuotas-sin-interes',
+  '/descuentos/educacion',
+  '/descuentos/cmr-puntos',
+  '/descuentos/otros'
 ];
 
 const DISCOVERY_SEEDS = [
@@ -347,15 +362,16 @@ function parseBenefitPage(html, url) {
 function dedupeItems(items) {
   const map = new Map();
   for (const item of items) {
-    const key = `${item.comercio}`.toLowerCase().trim();
+    // No deduplicar solo por comercio: un mismo comercio puede tener más de un beneficio vigente.
+    const key = `${item.urlFuente || ''}`.toLowerCase().trim() || `${item.comercio}|${item.beneficio}|${item.vigencia}`.toLowerCase().trim();
     if (!key) continue;
     const current = map.get(key);
     if (!current) {
       map.set(key, item);
       continue;
     }
-    const currentScore = `${current.beneficio} ${current.detalle}`.length;
-    const newScore = `${item.beneficio} ${item.detalle}`.length;
+    const currentScore = `${current.beneficio} ${current.detalle} ${current.logoComercio}`.length;
+    const newScore = `${item.beneficio} ${item.detalle} ${item.logoComercio}`.length;
     if (newScore > currentScore) map.set(key, item);
   }
   return [...map.values()].sort((a, b) => a.comercio.localeCompare(b.comercio, 'es'));
@@ -402,7 +418,7 @@ async function processInBatches(urls, batchSize = 4) {
   return items;
 }
 
-exports.handler = async () => {
+exports.handler = async (event) => {
   try {
     const detailLinks = await getDetailLinks();
 
@@ -418,8 +434,15 @@ exports.handler = async () => {
       };
     }
 
-    const sampleLinks = detailLinks.slice(0, 60);
-    const parsed = await processInBatches(sampleLinks, 4);
+    const params = event?.queryStringParameters || {};
+    const requestedLimit = String(params.limit || '250').toLowerCase();
+    const maxLinks = requestedLimit === 'all' ? 250 : Math.min(Math.max(parseInt(requestedLimit, 10) || 250, 1), 250);
+    const batchSize = Math.min(Math.max(parseInt(params.batch || '8', 10) || 8, 1), 12);
+
+    // Antes estaba limitado a 60. Para acercarnos al total publicado por Banco Falabella
+    // procesamos hasta 250 links de detalle detectados desde sitemap/categorías.
+    const sampleLinks = detailLinks.slice(0, maxLinks);
+    const parsed = await processInBatches(sampleLinks, batchSize);
 
     const items = dedupeItems(
       parsed
@@ -437,6 +460,8 @@ exports.handler = async () => {
         source: LIST_URL,
         totalDetectedLinks: detailLinks.length,
         totalProcessedLinks: sampleLinks.length,
+        scrapeLimit: maxLinks,
+        batchSize,
         scrapedAt: new Date().toISOString(),
         items
       })
