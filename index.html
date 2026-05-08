@@ -1,101 +1,33 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ConQuePago | Beneficios Banco Falabella</title>
-  <link rel="stylesheet" href="./styles.css" />
+<meta charset="UTF-8">
+<title>ConQuePago MultiBanco</title>
+<style>
+body{font-family:Arial;padding:20px;background:#f5f5f5}
+.card{background:#fff;padding:16px;border-radius:12px;margin-bottom:12px}
+button{padding:10px 16px;border:none;border-radius:8px;background:#111;color:#fff}
+</style>
 </head>
 <body>
-  <div class="app-shell">
-    <header class="hero">
-      <div>
-        <p class="eyebrow">ConQuePago · extractor público</p>
-        <h1>Beneficios Banco Falabella</h1>
-        <p class="hero-copy">
-          Visualiza y exporta beneficios públicos detectados desde Banco Falabella.
-          La extracción se hace desde una función serverless para evitar CORS en Netlify.
-        </p>
-      </div>
-      <div class="hero-actions">
-        <button id="loadBtn" class="primary">Actualizar beneficios</button>
-        <button id="exportJsonBtn" class="secondary" disabled>Exportar JSON</button>
-        <button id="exportCsvBtn" class="secondary" disabled>Exportar CSV</button>
-      </div>
-    </header>
+<h1>ConQuePago MultiBanco</h1>
+<button onclick="load()">Cargar beneficios</button>
+<div id="results"></div>
 
-    <section class="controls card">
-      <div class="control-group grow">
-        <label for="searchInput">Buscar</label>
-        <input id="searchInput" type="search" placeholder="comercio, categoría, tarjeta, beneficio..." />
-      </div>
-      <div class="control-group">
-        <label for="categoryFilter">Categoría</label>
-        <select id="categoryFilter">
-          <option value="">Todas</option>
-        </select>
-      </div>
-      <div class="control-group">
-        <label for="cardFilter">Tarjeta</label>
-        <select id="cardFilter">
-          <option value="">Todas</option>
-        </select>
-      </div>
-      <div class="control-group">
-        <label for="modeFilter">Modalidad</label>
-        <select id="modeFilter">
-          <option value="">Todas</option>
-        </select>
-      </div>
-    </section>
-
-    <section class="stats-grid">
-      <article class="stat card">
-        <span class="stat-label">Beneficios cargados</span>
-        <strong id="statTotal">0</strong>
-      </article>
-      <article class="stat card">
-        <span class="stat-label">Comercios detectados</span>
-        <strong id="statMerchants">0</strong>
-      </article>
-      <article class="stat card">
-        <span class="stat-label">Categorías</span>
-        <strong id="statCategories">0</strong>
-      </article>
-      <article class="stat card">
-        <span class="stat-label">Última extracción</span>
-        <strong id="statUpdated">-</strong>
-      </article>
-    </section>
-
-    <section class="card panel">
-      <div class="panel-header">
-        <h2>Resultados</h2>
-        <span id="statusText" class="status">Sin cargar</span>
-      </div>
-      <div id="errorBox" class="error hidden"></div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Comercio</th>
-              <th>Categoría</th>
-              <th>Beneficio</th>
-              <th>Tarjetas</th>
-              <th>Modalidad</th>
-              <th>Vigencia</th>
-              <th>Días</th>
-              <th>Fuente</th>
-            </tr>
-          </thead>
-          <tbody id="resultsBody">
-            <tr><td colspan="8" class="empty">Presiona “Actualizar beneficios”.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </div>
-
-  <script src="./app.js"></script>
+<script>
+async function load(){
+ const res = await fetch('/.netlify/functions/beneficios');
+ const data = await res.json();
+ document.getElementById('results').innerHTML =
+   data.items.map(i => `
+     <div class="card">
+       <h3>${i.banco}</h3>
+       <p>${i.fuente}</p>
+       <small>${i.estado}</small>
+     </div>
+   `).join('');
+}
+</script>
 </body>
 </html>
